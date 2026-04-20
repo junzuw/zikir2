@@ -1,0 +1,15 @@
+{
+  "name": "Zikir Pagi Petang",
+  "short_name": "Zikir",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#1b5e20",
+  "theme_color": "#1b5e20",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2972/2972412.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
