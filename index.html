@@ -304,7 +304,7 @@
         </div>
 
         <div class="modal-body" style="padding: 20px 25px; overflow-y: auto; flex: 1; text-align: justify;">
-            <p style="font-weight: bold; color: var(--primary); margin-top: 0;">Saudaraku se-Islam,</p>
+            <p style="font-weight: bold; color: var(--primary); margin-top: 0;">Bismillah, Saudaraku se-Islam...</p>
             
             <p>Ini adalah satu aplikasi kecil yang berisi hal-hal terpenting yang hendaknya diamalkan oleh seorang Muslim, yaitu <strong>dzikir dan do'a pagi dan petang</strong>.</p>
             
@@ -631,9 +631,6 @@
         let idx = 0;
         let count = 0;
         let isTransitioning = false;
-        let startX = 0; 
-        let isDragging = false; 
-        let autoSlideTimer = null; 
 
         function toggleMuqaddimah() {
             const modal = document.getElementById('muqaddimahModal');
@@ -657,20 +654,23 @@
                 <div class="arti-box"><span class="arti-label">ARTINYA</span>${item.t}</div>
             `;
 
+            // Reset Card View
             card.style.transition = 'none';
             card.style.transform = 'translateX(0)';
             card.style.opacity = '1';
 
-            document.getElementById('counterBtn').innerHTML = `<span>${count}</span>`;
-            document.getElementById('counterBtn').classList.remove('done');
+            // Reset Button Counter
+            const btn = document.getElementById('counterBtn');
+            btn.innerHTML = `<span>${count}</span>`;
+            btn.classList.remove('done');
+
+            // Controls & Progress
             document.getElementById('btnPrev').disabled = (idx === 0);
             document.getElementById('btnNext').disabled = (idx === dataZikir[mode].length - 1);
             document.getElementById('progress-bar').style.width = ((idx + 1) / dataZikir[mode].length * 100) + '%';
             document.getElementById('status-title').innerText = `ZIKIR ${mode.toUpperCase()} (${idx + 1}/${dataZikir[mode].length})`;
             
-            // Mengembalikan scroll ke atas setiap ganti kartu
-            document.getElementById('mainContainer').scrollTop = 0;
-
+            // KUNCI PENTING: Kembalikan status lock setelah UI selesai dirender
             setTimeout(() => { 
                 card.style.transition = 'transform 0.3s ease-out, opacity 0.3s';
                 isTransitioning = false; 
@@ -693,9 +693,11 @@
             setTimeout(() => {
                 idx += dir;
                 updateUI();
+                window.scrollTo(0, 0);
             }, 300);
         }
 
+        // --- GESTURE SECTION ---
         const cardElement = document.getElementById('zikir-card');
         cardElement.addEventListener('touchstart', (e) => {
             if (isTransitioning) return;
@@ -716,6 +718,7 @@
             isDragging = false;
             let endX = e.changedTouches[0].clientX;
             let diffX = endX - startX;
+            
             if (Math.abs(diffX) > 80) {
                 if (diffX > 0 && idx > 0) changeSlide(-1);
                 else if (diffX < 0 && idx < dataZikir[mode].length - 1) changeSlide(1);
@@ -732,12 +735,11 @@
             if (navigator.vibrate) navigator.vibrate(40);
             const btn = document.getElementById('counterBtn');
             if (count === 0) {
+                isTransitioning = true;
                 btn.innerHTML = "<span>✔</span>";
                 btn.classList.add('done');
                 confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 } });
-                if (idx < dataZikir[mode].length - 1) {
-                    autoSlideTimer = setTimeout(() => { if(!isDragging) changeSlide(1); }, 2000);
-                }
+                if (idx < dataZikir[mode].length - 1) setTimeout(() => { changeSlide(1); }, 2500);
             } else {
                 btn.innerHTML = `<span>${count}</span>`;
             }
@@ -748,16 +750,21 @@
             el.style.display = (el.style.display === 'block') ? 'none' : 'block';
         }
 
-        function setMode(m) {
-            mode = m; idx = 0;
-            document.body.className = (mode === 'petang') ? 'dark-mode' : '';
-            document.getElementById('btnPagi').className = (mode === 'pagi' ? 'active' : '');
-            document.getElementById('btnPetang').className = (mode === 'petang' ? 'active' : '');
+        function changeSlide(dir) {
+            idx += dir;
+            updateUI();
+            window.scrollTo(0, 0);
+        }
+
+        function setMode(newMode) {
+            mode = newMode; idx = 0;
+            document.getElementById('bodyTag').className = (mode === 'petang') ? 'dark-mode' : '';
+            document.getElementById('btnPagi').classList.toggle('active', mode === 'pagi');
+            document.getElementById('btnPetang').classList.toggle('active', mode === 'petang');
             updateUI();
         }
 
         window.onload = () => { toggleMuqaddimah(); updateUI(); };
     </script>
 </body>
-
 </html>
